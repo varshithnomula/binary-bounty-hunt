@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Black Ice Terminal</title>
     <style>
         body {
@@ -10,14 +11,31 @@
             color: #0f0;
             font-family: monospace;
             padding: 20px;
+            margin: 0;
+            font-size: 16px;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
         }
         #terminal {
             border: 1px solid #0f0;
             padding: 10px;
-            height: 400px;
+            height: 50vh;
+            min-height: 200px;
             overflow-y: auto;
             margin-bottom: 10px;
             white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .prompt {
+            color: #0f0;
+            margin-right: 5px;
         }
         #input {
             width: 100%;
@@ -26,9 +44,8 @@
             border: none;
             padding: 5px;
             outline: none;
-        }
-        .prompt {
-            color: #0f0;
+            font-family: monospace;
+            font-size: 14px;
         }
         .next-btn {
             display: none;
@@ -39,6 +56,40 @@
             margin-top: 10px;
             cursor: pointer;
             font-family: monospace;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px auto;
+            display: none;
+        }
+        
+        /* Media queries for responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            #terminal {
+                height: 40vh;
+                font-size: 10px;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            #terminal {
+                padding: 8px;
+                font-size: 10px;
+            }
+            #input {
+                font-size: 12px;
+            }
+            h2 {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -51,9 +102,13 @@
         [System] Hint: Commands include scan, list /<dir>, status, [filename] to read files.<br>
         Type 'help' if you need reminders.
     </div>
-    <div class="prompt">></div>
-    <input type="text" id="input" placeholder="Enter command">
-    <button id="nextBtn" class="next-btn" onclick="window.location.href='morse_desc.html'">Next Game</button>
+    <div class="input-container">
+        <div class="prompt">></div>
+        <input type="text" id="input" placeholder="Enter command">
+    </div>
+    <div style="text-align: center;">
+        <button id="nextBtn" class="next-btn" onclick="window.location.href='morse_desc.html'">Next Game</button>
+    </div>
 
     <script>
 document.addEventListener('contextmenu', function(e) {
