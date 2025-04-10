@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Game Intro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: black;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Press Start 2P', cursive;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Matrix Background */
+      .matrix-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .matrix-background canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+        padding: 20px;
+        z-index: 1;
+      }
+
+      .text-container {
+        color: #ffffff;
+        text-shadow: 0 0 10px #eef2ee;
+        font-size: clamp(12px, 3vw, 16px);
+        line-height: 2;
+        margin-bottom: 40px;
+        min-height: 200px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: clamp(6px, 1.5vw, 10px);
+        height: clamp(12px, 3vw, 20px);
+        background: #1377c9;
+        box-shadow: 0 0 10px #1377c9;
+        margin-left: 5px;
+        animation: blink 0.5s infinite;
+        vertical-align: middle;
+      }
+
+      @keyframes blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+
+      .start-btn {
+        background: #BC13FE;
+        border: none;
+        padding: clamp(15px, 4vw, 20px) clamp(25px, 6vw, 40px);
+        font-family: 'Press Start 2P', cursive;
+        font-size: clamp(12px, 3vw, 16px);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+        color: black;
+        text-shadow: 0 0 5px #1377c9;
+        box-shadow: 0 0 15px #1377c9;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        display: block;
+      }
+
+      .start-btn:hover {
+        transform: scale(1.05);
+        background: #f8fcff;
+        box-shadow: 0 0 25px #fdfeff;
+      }
+
+      .start-btn::before {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 10px #ffffff;
+        transition: all 0.3s ease;
+      }
+
+      .start-btn:hover::before {
+        top: -6px;
+        left: -6px;
+        right: -6px;
+        bottom: -6px;
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+
+        .container {
+          padding: 15px;
+        }
+
+        .text-container {
+          margin-bottom: 30px;
+          min-height: 150px;
+        }
+
+        .start-btn::before {
+          top: -3px;
+          left: -3px;
+          right: -3px;
+          bottom: -3px;
+        }
+
+        .start-btn:hover::before {
+          top: -4px;
+          left: -4px;
+          right: -4px;
+          bottom: -4px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Matrix animation background -->
+    <div class="matrix-background">
+      <canvas id="matrix"></canvas>
+    </div>
+
+    <div class="container">
+      <div class="text-container">
+        <span id="text"></span>
+        <span class="cursor"></span>
+      </div>
+      <button class="start-btn" onclick="startGame()">START GAME</button>
+    </div>
+
+    <script>
+
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+      // Matrix background animation script
+      const canvas = document.getElementById('matrix');
+      const ctx = canvas.getContext('2d');
+      const cols = canvas.width = window.innerWidth;
+      const rows = canvas.height = window.innerHeight;
+
+      const characters = '01010101';
+      const fontSize = 10;
+      const columns = Math.floor(cols / fontSize);
+
+      // Array to store the y-position of each column
+      const drops = Array(columns).fill(0);
+
+      function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Translucent black background for trail effect
+        ctx.fillRect(0, 0, cols, rows);
+
+        ctx.fillStyle = '#800080'; // Green color for the text
+        ctx.font = `${fontSize}px monospace`;
+
+        // Loop through each column
+        for (let i = 0; i < drops.length; i++) {
+          const text = characters[Math.floor(Math.random() * characters.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > rows && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+
+          drops[i]++;
+        }
+      }
+
+      setInterval(drawMatrix, 33); // 30 frames per second
+
+      // Typing text effect
+      const text = "You're inside the mind of a machine. Lights flicker like thoughts—some true, some false.Flip one, others shift. Precision is everything.ONLY THE ONE IN THE CENTER IS THE TRUE LIGHT.";
+      let index = 0;
+      const textElement = document.getElementById('text');
+
+      function typeText() {
+        if (index < text.length) {
+          textElement.textContent += text.charAt(index);
+          index++;
+          setTimeout(typeText, 50);
+        }
+      }
+
+      function startGame() {
+        window.location.href = "bulb.html";
+      }
+
+      // Start typing when page loads
+      window.addEventListener('load', typeText);
+    </script>
+  </body>
+</html>

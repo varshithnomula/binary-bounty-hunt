@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title> Black Ice Terminal</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        #terminal {
+            border: 1px solid #0f0;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+        #input {
+            width: 100%;
+            background: #000;
+            color: #0f0;
+            border: none;
+            padding: 5px;
+            outline: none;
+        }
+        .prompt {
+            color: #0f0;
+        }
+        .next-btn {
+            display: none;
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h2> Black Ice [Terminal Access]</h2>
+    <div id="terminal">
+        [System] Welcome Agent. Encrypted System Detected.<br>
+        [System] Objective: Locate the hidden passphrase.<br>
+        [System] Hint: Commands include scan, list /<dir>, status, [filename] to read files.<br>
+        Type 'help' if you need reminders.
+    </div>
+    <div class="prompt">></div>
+    <input type="text" id="input" placeholder="Enter command">
+    <button id="nextBtn" class="next-btn" onclick="window.location.href='morse_desc.html'">Next Game</button>
+
+    <script>
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('input');
+
+        let attempts = 5;
+        let unlocked = false;
+
+        const commands = {
+            "help": "Commands: scan, list /<dir>, status, [filename] to read files, [riddle answer] to unlock.",
+            "scan": "Scan complete... Suspicious directory located: /vault",
+            "list /vault": "Directory /vault contains:\n- clue.txt\n- note.hidden\n- encrypted.dat",
+            "list": "Usage: list /<dir> (example: list /vault)",
+            "status": `System Status: LOCKED | Attempts Remaining: ${attempts}`,
+            "clue.txt": `"I am present everywhere but seen nowhere,\nI whisper in the silence and dance in the storm.\n[Missing Line]"`,
+            "note.hidden": "Missing clue: 'Without me, the leaves would never sway.'",
+            "encrypted.dat": "Encrypted file. Unreadable without correct key."
+        };
+
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                const cmd = input.value.trim().toLowerCase();
+                terminal.innerHTML += `\n> ${cmd}`;
+
+                if (unlocked) {
+                    terminal.innerHTML += "\n[System] Vault already unlocked. Proceed to next level.";
+                } 
+                else if (cmd === "wind") {
+                    terminal.innerHTML += "\n[ACCESS GRANTED] Vault Unlocked! Proceed to Level 3.";
+                    unlocked = true;
+                    document.getElementById('nextBtn').style.display = 'block';
+                }
+                else if (commands[cmd]) {
+                    terminal.innerHTML += `\n${commands[cmd]}`;
+                } 
+                else {
+                    attempts--;
+                    if (attempts > 0) {
+                        terminal.innerHTML += `\n[Error] Unknown input or incorrect answer. Attempts left: ${attempts}`;
+                    } else {
+                        terminal.innerHTML += "\n[System] Terminal locked due to multiple failed attempts.";
+                        input.disabled = true;
+                    }
+                }
+
+                terminal.scrollTop = terminal.scrollHeight;
+                input.value = "";
+            }
+        });
+    </script>
+</body>
+</html>

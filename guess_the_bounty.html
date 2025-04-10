@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guess the Bounty | Matrix Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --matrix-green: #00cc00;
+            --dark-bg: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Mono', monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--matrix-green);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #binaryRain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: black;
+        }
+
+        .game-container {
+            border: 1px solid var(--matrix-green);
+            padding: 1rem;  /* Reduced padding for mobile */
+            border-radius: 8px;
+            max-width: 600px;
+            width: 95%;    /* Increased width for mobile */
+            background: rgba(0, 0, 0, 0.97);
+            backdrop-filter: blur(5px);
+        }
+
+        main {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .level {
+            border: 1px solid var(--matrix-green);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .instruction {
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+
+        .sequence-display {
+            display: flex;
+            gap: 0.25rem;  /* Reduced gap for mobile */
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .digit {
+            width: 35px;
+            height: 35px;
+            border: 1px solid var(--matrix-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            position: relative;
+            background: rgba(0, 204, 0, 0.05);
+            box-shadow: 0 0 5px rgba(0, 204, 0, 0.2);
+        }
+
+        .digit::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 1px solid rgba(0, 204, 0, 0.3);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            .digit {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+        }
+        .input-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--matrix-green);
+            color: var(--matrix-green);
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 204, 0, 0.8);
+            color: var(--dark-bg);
+        }
+
+        .attempts-section {
+            border: 1px solid var(--matrix-green);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            min-height: 150px;
+        }
+
+        .attempts-section h2 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .awaiting {
+            opacity: 0.7;
+        }
+
+        .attempts-count {
+            opacity: 0.7;
+        }
+
+        .game-message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid var(--matrix-green);
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .game-message.success {
+            background: rgba(0, 204, 0, 0.1);
+            border-color: var(--matrix-green);
+        }
+
+        .game-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="binaryRain"></canvas>
+    <main>
+        <div class="game-container">
+            <div class="header">
+                <h1>GUESS THE BOUNTY</h1>
+                <span class="level">LEVEL 1</span>
+            </div>
+            <p class="instruction">Decode the 6-digit binary sequence. Each guess reveals matching positions.</p>
+            
+            <div class="sequence-display">
+                <div class="digit">?</div>
+                <div class="digit">?</div>
+                <div class="digit">?</div>
+                <div class="digit">?</div>
+                <div class="digit">?</div>
+                <div class="digit">?</div>
+            </div>
+
+            <div class="input-section">
+                <input type="text" id="guessInput" placeholder="Enter 6 digits (0s and 1s)" maxlength="6">
+                <button id="executeBtn">Execute</button>
+            </div>
+
+            <div class="attempts-section">
+                <h2>PREVIOUS ATTEMPTS</h2>
+                <div id="previousAttempts" class="attempts-log">
+                    <p class="awaiting">Awaiting input...</p>
+                </div>
+            </div>
+
+            <p class="attempts-count">0 attempts logged</p>
+        </div>
+    </main>
+
+    <script>
+        // Binary Rain Animation
+        const canvas = document.getElementById('binaryRain');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill().map(() => Math.random() * -100);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.95)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = `${fontSize}px monospace`;
+            ctx.shadowColor = '#00ff00';
+            ctx.shadowBlur = 1;
+
+            drops.forEach((drop, i) => {
+                const char = Math.random() < 0.5 ? '0' : '1';
+                
+                ctx.fillStyle = `rgba(0, 255, 0, 0.2)`;
+                ctx.fillText(char, i * fontSize, drop * fontSize);
+
+                drops[i] += 0.2 + Math.random() * 0.3;
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) {
+                    drops[i] = 0;
+                }
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        // Game Logic
+        class GuessTheBounty {
+            constructor() {
+                this.targetSequence = this.generateSequence();
+                this.attempts = 0;
+                this.setupEventListeners();
+            }
+
+            generateSequence() {
+                return Array.from({ length: 6 }, () => Math.floor(Math.random() * 2)).join('');
+            }
+
+            setupEventListeners() {
+                const input = document.getElementById('guessInput');
+                const executeBtn = document.getElementById('executeBtn');
+
+                input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^01]/g, '');
+                });
+
+                executeBtn.addEventListener('click', () => this.makeGuess());
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.makeGuess();
+                });
+            }
+
+            makeGuess() {
+                const input = document.getElementById('guessInput');
+                const guess = input.value;
+
+                if (guess.length !== 6 || !/^[01]+$/.test(guess)) {
+                    this.showMessage('Please enter exactly 6 binary digits (0s and 1s)', 'error');
+                    return;
+                }
+
+                this.attempts++;
+                const matches = this.checkMatches(guess);
+                this.updateAttemptsLog(guess, matches);
+                input.value = '';
+
+                if (guess === this.targetSequence) {
+                    this.showMessage('Congratulations! You\'ve cracked the code!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'congratulations.html';
+                    }, 1500);
+                }
+
+                document.querySelector('.attempts-count').textContent = 
+                    `${this.attempts} attempt${this.attempts !== 1 ? 's' : ''} logged`;
+            }
+
+            showMessage(text, type) {
+                let messageEl = document.querySelector('.game-message');
+                if (!messageEl) {
+                    messageEl = document.createElement('div');
+                    messageEl.className = 'game-message';
+                    document.querySelector('.game-container').insertBefore(
+                        messageEl,
+                        document.querySelector('.attempts-section')
+                    );
+                }
+                
+                messageEl.textContent = text;
+                messageEl.className = `game-message ${type}`;
+                
+                if (type === 'error') {
+                    setTimeout(() => messageEl.remove(), 3000);
+                }
+            }
+
+            checkMatches(guess) {
+                const matches = guess.split('').reduce((count, digit, index) => 
+                    count + (digit === this.targetSequence[index] ? 1 : 0), 0);
+                return `${matches}/6`;
+            }
+
+            updateAttemptsLog(guess, matches) {
+                const attemptsLog = document.getElementById('previousAttempts');
+                const attemptEntry = document.createElement('p');
+                attemptEntry.textContent = `${guess} - ${matches}`;
+                
+                if (attemptsLog.querySelector('.awaiting')) {
+                    attemptsLog.innerHTML = '';
+                }
+                
+                attemptsLog.insertBefore(attemptEntry, attemptsLog.firstChild);
+            }
+
+            resetGame() {
+                this.targetSequence = this.generateSequence();
+                this.attempts = 0;
+                document.getElementById('previousAttempts').innerHTML = '<p class="awaiting">Awaiting input...</p>';
+                document.querySelector('.attempts-count').textContent = '0 attempts logged';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        window.addEventListener('DOMContentLoaded', () => {
+            draw();
+            new GuessTheBounty();
+        });
+    </script>
+</body>
+</html>

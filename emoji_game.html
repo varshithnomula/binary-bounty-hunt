@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Emoji Guessing Game</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Theater Layout */
+        .theater {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Curtains */
+        .curtain {
+            position: fixed;
+            top: 0;
+            height: 100%;
+            width: 15%;
+            background: linear-gradient(to right, #3d0000, #8b0000);
+            z-index: 5;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .curtain-left {
+            left: 0;
+            border-right: 5px solid #2a0000;
+            background: linear-gradient(to right, #3d0000, #8b0000);
+            transform-origin: left;
+            animation: curtainWave 8s ease-in-out infinite alternate;
+        }
+
+        .curtain-right {
+            right: 0;
+            border-left: 5px solid #2a0000;
+            background: linear-gradient(to left, #3d0000, #8b0000);
+            transform-origin: right;
+            animation: curtainWave 8s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes curtainWave {
+            0%, 100% {
+                transform: scaleX(1);
+            }
+            50% {
+                transform: scaleX(1.03);
+            }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+            background-color: #121212;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 1px solid #333;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .film-icon {
+            display: inline-block;
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .subtitle {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 25px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #8b0000, #ff4500);
+            transition: width 0.5s ease;
+        }
+
+        /* Movie Screen */
+        .screen {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .screen-content {
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .emoji-display {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+        }
+
+        .answer-reveal {
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            height: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .answer-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Game Controls */
+        .game-controls {
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #222;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            border-color: #8b0000;
+            box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 6px;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .primary-btn {
+            background-color: #8b0000;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #a50000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .primary-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .secondary-btn {
+            background-color: #333;
+            color: #ddd;
+        }
+
+        .secondary-btn:hover {
+            background-color: #444;
+        }
+
+        .feedback {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            height: 30px;
+            margin: 15px 0;
+        }
+
+        .correct {
+            color: #4caf50;
+        }
+
+        .incorrect {
+            color: #f44336;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .skip-icon {
+            display: inline-block;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .secondary-btn:hover .skip-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Game Over Screen */
+        .game-over {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .trophy {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .game-over h2 {
+            color: #ffd700;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Theater Seats */
+        .theater-seats {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .back-row {
+            transform: scale(0.9);
+        }
+
+        .seat {
+            width: 20px;
+            height: 20px;
+            background-color: #8b0000;
+            border-radius: 5px 5px 0 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .emoji-display {
+                font-size: 3rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .curtain {
+                width: 10%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .emoji-display {
+                font-size: 2.5rem;
+            }
+            
+            .curtain {
+                width: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="theater">
+        <!-- Left Curtain -->
+        <div class="curtain curtain-left"></div>
+        
+        <!-- Right Curtain -->
+        <div class="curtain curtain-right"></div>
+        
+        <!-- Main Content -->
+        <div class="container">
+            <header>
+                <h1><span class="film-icon">🎬</span> MOVIE EMOJI QUIZ <span class="film-icon">🎬</span></h1>
+                <p class="subtitle">Guess the movie title from the emojis!</p>
+            </header>
+            
+            <div class="progress-container">
+                <div class="progress-text">
+                    <span>Progress: <span id="score">0</span>/3</span>
+                    <span id="percentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="screen">
+                <div class="screen-content">
+                    <div id="emoji-display" class="emoji-display"></div>
+                    <div id="answer-reveal" class="answer-reveal"></div>
+                </div>
+            </div>
+            
+            <div id="game-controls" class="game-controls">
+                <div class="input-group">
+                    <input type="text" id="guess-input" placeholder="Enter your guess..." autocomplete="off">
+                    <button id="submit-btn" class="btn primary-btn">SUBMIT</button>
+                </div>
+                
+                <div id="feedback" class="feedback"></div>
+                
+                <div class="action-buttons">
+                    <button id="hint-btn" class="btn secondary-btn">GET HINT</button>
+                    <button id="skip-btn" class="btn secondary-btn">SKIP <span class="skip-icon">↻</span></button>
+                </div>
+            </div>
+            
+            <div id="game-over" class="game-over hidden">
+                <div class="trophy">🏆</div>
+                <h2>WINNER!</h2>
+                <p>You correctly guessed 5 movies!</p>
+                <div class="button-container">
+                    <button id="next-game-btn" class="btn primary-btn" onclick="window.location.href='riddle_dec.html'">NEXT GAME</button>
+                </div>
+            </div>
+            
+            <div class="theater-seats">
+                <div class="seat-row">
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                </div>
+                <div class="seat-row back-row">
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                    <div class="seat"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game data
+            const emojiPuzzles = [
+                { emojis: "🔍 🐠", answer: "finding nemo", hint: "An overprotective clownfish father searches the ocean for his lost son." },
+                { emojis: "🚢 🧊 💔", answer: "titanic", hint: "A famous ship hits an iceberg, leading to a tragic romance." },
+                { emojis: "🎈 🏠 👴", answer: "up", hint: "An old man uses thousands of balloons to fly his house to South America." },
+                { emojis: "🦁 👑 🌅", answer: "the lion king", hint: "A young prince must learn to be king after his father's death. Hakuna Matata!" },
+                { emojis: "⭐ ⚔️ 🤖", answer: "star wars", hint: "Set in a galaxy far, far away, involving lightsabers and the Force." },
+                { emojis: "🦖 🏞️ 🚙", answer: "jurassic park", hint: "Scientists clone dinosaurs for a theme park, but things go wrong." },
+                { emojis: "👻 🚫 👨‍🔬", answer: "ghostbusters", hint: "Who ya gonna call? These guys catch paranormal pests." },
+                { emojis: "🧸 🤠 🚀", answer: "toy story", hint: "Toys come alive when humans aren't looking. Features a cowboy and a space ranger." },
+                { emojis: "👊 🧼 🚫🗣️", answer: "fight club", hint: "The first rule is: You do not talk about..." },
+                { emojis: "🧑‍🚀 ⭐ 🌽", answer: "interstellar", hint: "Humanity searches for a new home among the stars due to Earth's dying environment." },
+                { emojis: "😴 🧠 🏙️", answer: "inception", hint: "Thieves enter people's dreams to steal or plant ideas. Features folding cities." },
+                { emojis: "👽 🌳 🌏", answer: "avatar", hint: "Humans use remotely controlled bodies to interact with natives on the planet Pandora." },
+                { emojis: "🦇 🃏 🌃", answer: "the dark knight", hint: "Gotham's caped crusader faces his chaotic arch-nemesis, the Joker." },
+                {
+                emojis: "🐼 🥋 🍜",
+                answer: "kung fu panda",
+                hint: "A clumsy bear learns to fight for his destiny."
+                }
+            ];
+
+            // DOM elements
+            const emojiDisplay = document.getElementById('emoji-display');
+            const answerReveal = document.getElementById('answer-reveal');
+            const guessInput = document.getElementById('guess-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const skipBtn = document.getElementById('skip-btn');
+            const feedback = document.getElementById('feedback');
+            const scoreElement = document.getElementById('score');
+            const percentageElement = document.getElementById('percentage');
+            const progressFill = document.getElementById('progress-fill');
+            const gameControls = document.getElementById('game-controls');
+            const gameOver = document.getElementById('game-over');
+            const nextGameBtn = document.getElementById('next-game-btn');
+
+            // Game state
+            let currentPuzzle = null;
+            let currentAnswer = '';
+            let score = 0;
+            let usedPuzzles = [];
+            let gameEnded = false;
+
+            // Initialize game
+            function initGame() {
+                score = 0;
+                usedPuzzles = [];
+                gameEnded = false;
+                updateScore();
+                selectRandomPuzzle();
+                gameControls.classList.remove('hidden');
+                gameOver.classList.add('hidden');
+                guessInput.value = '';
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            }
+
+            // Select a random puzzle
+            function selectRandomPuzzle() {
+                if (usedPuzzles.length === emojiPuzzles.length) {
+                    feedback.textContent = "You've played all available puzzles!";
+                    return;
+                }
+
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * emojiPuzzles.length);
+                } while (usedPuzzles.includes(randomIndex));
+
+                currentPuzzle = emojiPuzzles[randomIndex];
+                currentAnswer = currentPuzzle.answer;
+                usedPuzzles.push(randomIndex);
+                
+                emojiDisplay.textContent = currentPuzzle.emojis;
+                answerReveal.textContent = '';
+                answerReveal.classList.remove('visible');
+            }
+
+            // Update score and progress
+            function updateScore() {
+                scoreElement.textContent = score;
+                const percentage = Math.round((score / 3) * 100);
+                percentageElement.textContent = `${percentage}%`;
+                progressFill.style.width = `${percentage}%`;
+            }
+
+            // Check the player's guess
+            function checkGuess() {
+                const guess = guessInput.value.trim().toLowerCase();
+                
+                if (guess === '') {
+                    return;
+                }
+                
+                if (guess === currentAnswer) {
+                    score++;
+                    updateScore();
+                    feedback.textContent = "Correct! 🎉";
+                    feedback.className = 'feedback correct';
+                    
+                    if (score >= 3) {
+                        endGame();
+                    } else {
+                        setTimeout(() => {
+                            guessInput.value = '';
+                            feedback.textContent = '';
+                            feedback.className = 'feedback';
+                            selectRandomPuzzle();
+                        }, 1500);
+                    }
+                } else {
+                    feedback.textContent = "Incorrect. Try again!";
+                    feedback.className = 'feedback incorrect';
+                }
+            }
+
+            // Reveal hint
+            function showHint() {
+                answerReveal.textContent = currentPuzzle.hint;
+                answerReveal.classList.add('visible');
+            }
+
+            // Reveal the answer
+            function revealAnswer() {
+                answerReveal.textContent = `Answer: ${currentAnswer.toUpperCase()}`;
+                answerReveal.classList.add('visible');
+            }
+
+            // Skip to the next puzzle
+            function skipPuzzle() {
+                guessInput.value = '';
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+                answerReveal.classList.remove('visible');
+                selectRandomPuzzle();
+            }
+
+            // End the game
+            function endGame() {
+                gameEnded = true;
+                gameControls.classList.add('hidden');
+                gameOver.classList.remove('hidden');
+            }
+
+            // Event listeners
+            submitBtn.addEventListener('click', checkGuess);
+            
+            guessInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    checkGuess();
+                }
+            });
+            
+            hintBtn.addEventListener('click', showHint);
+            skipBtn.addEventListener('click', skipPuzzle);
+            // Remove this line: playAgainBtn.addEventListener('click', initGame);
+
+            // Start the game
+            initGame();
+
+            // Add some visual effects
+            document.querySelectorAll('.seat').forEach(seat => {
+                seat.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#a50000';
+                });
+                
+                seat.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '#8b0000';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

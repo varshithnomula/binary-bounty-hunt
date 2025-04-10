@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrix Rain Animation with O's and X's</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      min-height: 100vh;
+      background: black;
+      color: #39ff14;
+      overflow-x: hidden;
+    }
+
+    #matrix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .glitch {
+      font-size: 4rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+      color: #39ff14;
+      text-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14;
+      position: relative;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .glitch::before {
+      animation: glitchTop 2s infinite linear alternate-reverse;
+      color: #00ffcc;
+      top: -2px;
+    }
+
+    .glitch::after {
+      animation: glitchBottom 2s infinite linear alternate-reverse;
+      color: #ff00ff;
+      top: 2px;
+    }
+
+    @keyframes glitchTop {
+      0% { clip-path: inset(0 0 85% 0); }
+      100% { clip-path: inset(5% 0 0 0); }
+    }
+
+    @keyframes glitchBottom {
+      0% { clip-path: inset(85% 0 0 0); }
+      100% { clip-path: inset(0 0 5% 0); }
+    }
+
+    .typing-container {
+      overflow: hidden;
+      width: 100%;
+      max-width: 32rem;
+      margin: 0 auto 2rem;
+    }
+
+    .typing-text {
+      font-size: 1.25rem;
+      color: #00ff99;
+      border-right: 2px solid #00ff99;
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 4s steps(40, end) forwards,
+                blink 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink {
+      50% { border-color: transparent }
+    }
+
+    .intro {
+      font-size: 1.125rem;
+      max-width: 42rem;
+      margin-bottom: 3rem;
+      color: #a9ff9a;
+    }
+
+    .gameplay {
+      margin-bottom: 3rem;
+    }
+
+    .gameplay h2 {
+      font-size: 1.5rem;
+      color: #00ff99;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .gameplay ul {
+      list-style: none;
+      color: #9efe8d;
+      font-size: 1.125rem;
+    }
+
+    .gameplay li {
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      font-size: 1.125rem;
+      max-width: 48rem;
+      margin-bottom: 3rem;
+      line-height: 1.7;
+      color: #ffffff;
+    }
+
+    .cta-button {
+      padding: 1rem 2rem;
+      font-size: 1.25rem;
+      border: 2px solid #ffffff; /* Changed from #39ff14 to white */
+      color: #000000; /* Changed from #39ff14 to black */
+      background: #ffffff; /* Changed from transparent to white */
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px #ffffff; /* Changed from #39ff14 to white */
+      margin-bottom: 3rem;
+    }
+
+    .cta-button:hover {
+      background: #e0e0e0; /* Changed hover background */
+      color: black;
+      box-shadow: 0 0 30px #ffffff; /* Changed from #39ff14 to white */
+    }
+
+    footer {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+
+    footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    .calendar-icon {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    /* Add these media queries at the end of your existing styles */
+    @media screen and (max-width: 768px) {
+        .container {
+            padding: 2rem 1rem;
+        }
+
+        .glitch {
+            font-size: 2.5rem;
+        }
+
+        .typing-text {
+            font-size: 1rem;
+        }
+
+        .intro {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .gameplay h2 {
+            font-size: 1.25rem;
+        }
+
+        .gameplay ul {
+            font-size: 1rem;
+        }
+
+        .description {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .cta-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .glitch {
+            font-size: 2rem;
+        }
+
+        .typing-container {
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+
+        .typing-text {
+            font-size: 0.9rem;
+        }
+
+        footer {
+            font-size: 0.8rem;
+        }
+
+        footer p {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Update the canvas script for better mobile performance */
+    @media screen and (max-width: 768px) {
+        #matrix-canvas {
+            opacity: 0.6;
+        }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix-canvas"></canvas>
+  <div class="overlay"></div>
+  <div class="container">
+    <h1 class="glitch" data-text="Binary Bounty Hunt">Binary Bounty Hunt</h1>
+    <div class="typing-container">
+      <p class="typing-text">Think you've got what it takes to crack the code</p>
+    </div>
+    <p class="intro">
+      Welcome to <strong>Binary Bounty Hunt</strong> – a thrilling level-based 
+      challenge where only the sharpest minds survive!
+    </p>
+
+    <div class="gameplay">
+      <h2>🧠 Gameplay Breakdown:</h2>
+      <ul>
+        <li>Decode. Advance. Conquer.</li>
+        <li>Progressive Difficulty – Each level tests your logic, speed, and brainpower.</li>
+      </ul>
+    </div>
+
+    <p class="description">
+      You've been pulled into a digital web of challenges—each more complex than the last. 
+      They say there's a secret hidden somewhere in the core of the system, a Binary Bounty, 
+      an encrypted treasure that awaits the most skilled, most daring. And you… You've stepped 
+      forward to claim it. But the road ahead is fraught with trials designed to test your 
+      intelligence, patience, and cunning. Only the brave can uncover the truth that lies 
+      behind the code. Are you READY?
+    </p>
+
+    <button class="cta-button" onclick="window.location.href='emoji_desc.html'">Join the Hunt</button>
+  </div>
+
+  <script>
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const chars = ['O', 'X'];
+    // Update the fontSize calculation for mobile
+    const fontSize = window.innerWidth <= 768 ? 15 : 20;
+    
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#BC13FE';
+      ctx.font = `${fontSize}px monospace`;
+
+      drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        ctx.fillText(char, x, y * fontSize);
+
+        if (y * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      });
+    }
+
+    setInterval(draw, 33);
+  </script>
+</body>
+</html>

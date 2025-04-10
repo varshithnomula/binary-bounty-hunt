@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Level-1</title>
+  <link rel="stylesheet" href="">
+  <style>
+    body { 
+      font-family: 'Courier New', monospace;
+      padding: 20px; 
+      max-width: 800px; 
+      margin: auto; 
+      background-color: #000; 
+      color: #fff;
+    }
+    h1 { 
+      text-align: center; 
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 10px;
+      font-size: 28px;
+    }
+    .riddle { 
+      margin-bottom: 20px; 
+      background-color: #111;
+      padding: 15px;
+      border-left: 3px solid #444;
+    }
+    .riddle p {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    input[type="text"] { 
+      width: 100%; 
+      padding: 10px; 
+      font-size: 16px; 
+      background-color: #222;
+      border: 1px solid #444;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      box-sizing: border-box;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #888;
+      box-shadow: 0 0 5px rgba(255,255,255,0.2);
+    }
+    button { 
+      padding: 12px 20px; 
+      font-size: 16px; 
+      margin-top: 20px; 
+      display: block; 
+      width: 100%; 
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    #message { 
+      margin-top: 20px; 
+      color: #ff5555; 
+      text-align: center; 
+      font-size: 18px;
+      padding: 10px;
+      background-color: rgba(255, 0, 0, 0.1);
+      display: none;
+    }
+    #nextGameBtn {
+      display: none;
+      background: #444;
+      color: white;
+      padding: 12px 20px;
+      margin-top: 20px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    #nextGameBtn:hover {
+      background-color: #666;
+    }
+    
+    /* Responsive styles for mobile devices */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      
+      .riddle p {
+        font-size: 16px;
+      }
+      
+      input[type="text"] {
+        padding: 8px;
+        font-size: 14px;
+      }
+      
+      button {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+      
+      #message {
+        font-size: 16px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 20px;
+        letter-spacing: 1px;
+      }
+      
+      .riddle {
+        padding: 10px;
+      }
+      
+      .riddle p {
+        font-size: 14px;
+      }
+      
+      input[type="text"] {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Riddle Challenge</h1>
+
+  <div class="riddle">
+    <p>1.I am red, sometimes green, and I grow on a tree. I keep the doctor away, or so people say.</p>
+    <input type="text" id="riddle1" />
+  </div>
+
+  <div class="riddle">
+    <p>2. I have hands but no arms, a face but no eyes. I tell time, but I never lie.</p>
+    <input type="text" id="riddle2" />
+  </div>
+
+  <div class="riddle">
+    <p>3. The more you take from me, the bigger I get. What am I?</p>
+    <input type="text" id="riddle3" />
+  </div>
+
+  <div class="riddle">
+    <p>4. I speak without a mouth and hear without ears. I have no body, but I come alive with the wind.</p>
+    <input type="text" id="riddle4" />
+  </div>
+
+  <div class="riddle">
+    <p>5. Forward I am heavy, but backward I’m not. What am I?</p>
+    <input type="text" id="riddle5" />
+  </div>
+
+  <div class="riddle">
+    <p>6. I’m seen in the middle of March and April, I’m not in June. What letter am I?</p>
+    <input type="text" id="riddle6" />
+  </div>
+
+  <div class="riddle">
+    <p>7. I am a seven-letter word. My first two letters refer to a male. The first three letters can refer to a female. The first four letters refer to a great man. The entire word refers to a great woman. What am I?</p>
+    <input type="text" id="riddle7" />
+  </div>
+
+  <button onclick="checkAnswers()">Unlock Next Page</button>
+  <div id="message"></div>
+
+  <button id="nextGameBtn" onclick="window.location.href='glitch_desc.html'">Next Game</button>
+
+  <script>
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+    function checkAnswers() {
+      const inputs = [
+        document.getElementById('riddle1').value.trim().toLowerCase(),
+        document.getElementById('riddle2').value.trim().toLowerCase(),
+        document.getElementById('riddle3').value.trim().toLowerCase(),
+        document.getElementById('riddle4').value.trim().toLowerCase(),
+        document.getElementById('riddle5').value.trim().toLowerCase(),
+        document.getElementById('riddle6').value.trim().toLowerCase(),
+        document.getElementById('riddle7').value.trim().toLowerCase()
+      ];
+
+      const correctAnswers = ['apple', 'clock', 'hole', 'echo', 'ton', 'r', 'heroine'];
+      const firstLetters = [];
+
+      for (let i = 0; i < correctAnswers.length; i++) {
+        if (inputs[i] !== correctAnswers[i]) {
+          document.getElementById('message').style.display = 'block';
+          document.getElementById('message').innerText = "Oops! One or more answers are incorrect.";
+          return;
+        }
+        firstLetters.push(correctAnswers[i][0].toUpperCase());
+      }
+
+      const key = firstLetters.join('');
+      document.getElementById('nextGameBtn').style.display = 'block';
+      document.getElementById('message').style.display = 'block';
+      document.getElementById('message').style.color = '#5f5';
+      document.getElementById('message').innerText = "All answers correct! Click 'Next Game' to continue.";
+    }
+  </script>
+</body>
+</html>
